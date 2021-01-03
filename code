@@ -1,0 +1,123 @@
+//OLED Display
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+//Sensor
+#include "DHT.h"
+#define DHTPIN 8 
+#define DHTTYPE DHT22 
+DHT dht(DHTPIN, DHTTYPE);
+
+//Pin H-Bruecke
+#define En 
+#define PinA 
+#define PinB 
+
+//Pin Relai
+#define	RPin1
+#define	RPin2
+
+//Taster Pin
+#define TasterPin 
+
+Adafruit_SSD1306 display(-1);
+
+void setup() {
+
+//Display initialisieren
+display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+display.clearDisplay();
+display.display();
+delay(2000);
+  display.setTextColor(WHITE);
+  display.setCursor(27, 30);
+  display.setTextSize(2);
+  display.println("Willkommen");
+  display.display();
+  delay(5000);
+  display.clearDisplay();
+
+//als Output festlegen
+	pinMode(En,1);
+	pinMode(PinA,1);
+	pinMode(PinB,1);
+	
+	pinMode(RPin1,1);
+	pinMode(RPin2,1);
+	
+	pinMode(TasterPin,0);
+}
+ 
+void loop() {
+ 
+	//Warte
+	delay(2000);
+	 
+	// Lese die Luftfeuchtigkeit
+	float h = dht.readHumidity();
+	 
+	// Lese die Temperatur in Celsius
+	float t = dht.readTemperature();
+	
+	//Temperaturanzeige 
+	display.setCursor(15,1);
+	display.setTextSize(1);
+	display.print("Temperature:");
+
+	display.setCursor(28, 1);
+	display.setTextSize(1);
+	display.print(t);
+
+	display.setCursor(33, 1);
+	display.setTextSize(1);
+	display.print("°C");
+
+	//Luftfeutigkeitsanzeige
+	display.setCursor(15,30);
+	display.setTextSize(1);
+	display.print("Humidity:");
+
+	display.setCursor(28, 30);
+	display.setTextSize(1);
+	display.print(t);
+
+	display.setCursor(33, 30);
+	display.setTextSize(1);
+	display.print("%");
+
+	
+	//wenn Luftfeuchtigkeit<40 Pumpe einschalten
+	if(h<40)
+		digitalWrite(RPin1,1);
+	}
+	//wenn Luftfeuchtigkeit>70 Pumpe ausschalten
+	if(h>70)
+		digitalWrite(RPin1,0);
+	}
+	
+	//wenn Temperatur<37.5 Heizventilator einschalten
+	if(t<37.5)
+		digitalWrite(RPin2,1);
+	}
+	//wenn Temperatur>38 Heizventilator ausschalten
+	//und wenn Luftfeuchtigkeit<70 Pumpe einschalten
+	if(t>38)
+	{
+		digitalWrite(RPin2,0);
+		if(h<70)
+			digitalWrite(RPin1,1);
+	}
+	//Rollenhorde stündlich wenden oder beim Druecker den Taster
+	if(n==600 || analogRead(TasterPin)==1)
+		{
+			//Motor zur Drehung bringen
+			digitalWrite(PinA,1);
+			digitalWrite(PinB,0);
+			//Geschwindigkeit festlegen
+			analogWrite(En,200);
+			n=0;
+		}
+	n++;
+	delay(2000);
+}
